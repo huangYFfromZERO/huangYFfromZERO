@@ -1,0 +1,164 @@
+//基础搜索的内容bfs&dfs 题目为kuangbin系列1 https://vjudge.net/contest/173084#problem
+//PS算法学起来真是累人。很多时候感觉还是单纯的写一点东西更叫人觉得开心，而不是为了AC。
+//Problem A
+//写下来感觉这题并很简单，但是当初的思考方向还是想的有些问题，VISIT标记是惯例，虽然在这题中我感觉如果按行dfs的话列可以不用visit统计。其余就是标记
+//每列是否已经被棋子占了，以及在输入中判断位置是否为棋子位置。全当再回顾一遍dfs了，其实该尝试一遍stack实现的。
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+int qi[10][10],n,k,visit[10][10],ans=0,lie[10];    //用于标记列是否有棋子
+char tempc;
+void dfs(int deep,int num)
+{
+	if(num==0) {ans++;return ;}                      //dfs的图的边界
+	if(deep>n) return ;
+	for(int i=1;i<=n;i++)                            //对于每一行按列进行dfs即deep
+	{
+		if(qi[deep][i]==1&&visit[deep][i]!=1&&lie[i]!=1)     
+		{
+			visit[deep][i]=1;
+			lie[i]=1;
+			dfs(deep+1,num-1);
+			visit[deep][i]=0;
+			lie[i]=0;
+		}
+	}
+	dfs(deep+1,num);
+}
+int main()
+{
+	while(scanf("%d%d",&n,&k))
+	{
+		if(n==-1&&k==-1) break;
+		ans=0;
+		memset(qi,0,sizeof(qi));
+		memset(lie,0,sizeof(lie));
+		for(int i=1;i<=n;i++) {for(int j=1;j<=n;j++)  {cin>>tempc;if(tempc=='#')qi[i][j]=1;visit[i][j]=0;}}
+		dfs(1,k);
+		cout<<ans<<endl;
+	}
+}
+//Problem B
+//很基础的一道迷宫题，与传统二维的就是多加了一个维度，而在使用bfs时就会要六个方向，用数组存在用循环入队列会方便很多。
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <queue>
+#include <algorithm>
+#include<cstdio>
+using namespace std;
+char map[35][35][35];
+int vis[35][35][35];
+int k,n,m,sx,sy,sz,ex,ey,ez;
+int to[6][3] = {{0,0,1},{0,0,-1},{0,1,0},{0,-1,0},{1,0,0},{-1,0,0}};           //六个方向的操作     
+struct node
+{
+    int x,y,z,step;
+}a,next;                                                    //用于进行bfs的队列单元
+int check(int x,int y,int z)                                //判断是否超界，是否已经访问过，是否为障碍物，即入队的条件
+{
+    if(x<0||y<0||z<0||x>=k||y>=n||z>=m)
+        return 1;
+    else if(map[x][y][z] == '#')
+        return 1;
+    else if(vis[x][y][z])
+        return 1;
+    return 0;
+}
+int bfs()
+{
+    int i;
+    queue<node>Q;
+    a.x=sx,a.y=sy,a.z=sz;
+    a.step=0;
+    vis[sx][sy][sz]=1;
+    Q.push(a);
+    while(!Q.empty())                                                                            //起点入队，然后不断取头节点，判断六个方向再分别入队即可
+    {
+        a=Q.front();
+        Q.pop();
+        if(a.x==ex&&a.y==ey&&a.z ==ez) return a.step;                                                   
+        for(i=0;i<6;i++)
+        {
+            next=a;
+            next.x=a.x+to[i][0];
+            next.y=a.y+to[i][1];
+            next.z=a.z+to[i][2];
+            if(check(next.x,next.y,next.z)) continue;
+            vis[next.x][next.y][next.z]=1;
+            next.step=a.step+1;
+            Q.push(next);
+        }
+    }
+    return 0;
+}
+int main()
+{
+    int i,j,r,ans;
+    while(scanf("%d%d%d",&k,&n,&m),n+m+k)
+    {
+        for(i = 0; i<k; i++)
+        {
+            for(j = 0; j<n; j++)
+            {
+                scanf("%s",map[i][j]);
+                for(r = 0; r<m; r++) if(map[i][j][r] == 'S') sx=i,sy=j,sz=r; else if(map[i][j][r] == 'E') ex=i,ey=j,ez=r;
+            }
+        }
+        memset(vis,0,sizeof(vis));
+        ans = bfs();
+        if(ans) printf("Escaped in %d minute(s).\n",ans);else printf("Trapped!\n");
+    }
+ 	return 0;
+}
+//Problem C
+//这么简单的一道bfs题狂错，蜜汁runtime error不知道是不是因为队列爆了，感觉和其他别人AC的代码差别不大。
+#include<iostream>
+#include<algorithm>
+#include<queue>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+struct point{
+	int steps;
+	int num;
+}ori,temp1,temp2,temp3,temp4;
+queue<point>q;
+int n,k,visit[900100];
+int bfs()
+{
+	int temp;
+	ori.num=n,ori.steps=0;
+	q.push(ori);
+	visit[n]=1;
+	while(!q.empty())
+	{
+		temp1=q.front();
+		q.pop();
+		visit[temp1.num]=1;
+		if(temp1.num==k) return temp1.steps;
+		temp3.steps=temp1.steps+1;
+		temp2.steps=temp1.steps+1;
+		temp4.steps=temp1.steps+1;
+		if(temp1.num<k) {temp2.num=temp1.num+1;if(!visit[temp2.num]) {q.push(temp2);visit[temp2.num]=1;}}
+		if(temp1.num>1) {temp3.num=temp1.num-1;if(!visit[temp3.num]) {q.push(temp3);visit[temp3.num]=1;}}
+		if(temp1.num<k) {temp4.num=temp1.num*2;if(!visit[temp4.num]) {q.push(temp4);visit[temp4.num]=1;}}
+	}
+	return -1;
+}
+int main()
+{
+	while(~scanf("%d%d",&n,&k))
+	{
+		while(!q.empty()) q.pop();
+		memset(visit,0,sizeof(visit));
+		cout<<bfs()<<endl;
+	}
+}
+
+
+
+
+
+

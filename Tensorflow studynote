@@ -1,0 +1,27 @@
+#Matrix Multiplication(Tensorflow)
+#利用tensorflow计算矩阵乘法
+import tensorflow as tf
+matrix1 = tf.constant([[1, 2, 3]])
+matrix2 = tf.constant([[1], [2], [3]])
+res = tf.matmul(matrix1, matrix2)
+with tf.Session() as sess:
+    sum = sess.run(res)
+    print(sum)
+    sess.close()
+    
+#注意矩阵的写法，行/列的关系，维度与括号有关系！矩阵仅限于二维的ndarray
+#Counter
+import tensorflow as tf
+count = tf.Variable(1, name="counter")
+two = tf.constant(2)
+new = tf.multiply(count, two)
+update = tf.assign(count, new)
+init_op =tf.global_variables_initializer()
+with tf.Session() as sess:
+    sess.run(init_op)
+    for _ in range(3):
+        sess.run(update)
+        print(sess.run(count))
+    sess.close()
+
+##感觉用到的函数瞬间多了很多，像assign，慢慢熟练掌握他们

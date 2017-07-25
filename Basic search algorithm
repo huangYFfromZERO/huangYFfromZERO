@@ -156,8 +156,38 @@ int main()
 		cout<<bfs()<<endl;
 	}
 }
-
-
+Problem E
+//因为对于二进制爆搜实在无感，就先把D题跳过了，这道题感觉是一道very_easy的搜索题，只要注意数据的大小，选用unsigned long long即可。不过给的sample有点
+//坑，还以为有啥特殊要求。原来时他的答案太大了，直接搜就okay了。
+#include<iostream>
+#include<cstdio>
+#include<queue>
+using namespace std;
+unsigned long long n,temp1,temp2,temp3,temp;
+queue<unsigned long long>q;
+unsigned long long bfs()
+{
+	while(!q.empty()) q.pop();
+	q.push(1);
+	while(!q.empty())
+	{
+		temp=q.front();
+		q.pop();
+		if(temp%n==0) return temp;
+		temp1=temp*10+1;
+		temp2=temp*10;
+		q.push(temp1);
+		q.push(temp2);
+	}
+}
+int main()
+{
+	while(scanf("%llu",&n)&&n)
+	{
+		temp3=bfs();
+		printf("%llu\n",temp3);
+	}
+}
 
 
 

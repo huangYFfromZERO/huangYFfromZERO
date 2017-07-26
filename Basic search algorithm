@@ -114,46 +114,41 @@ int main()
 }
 //Problem C
 //这么简单的一道bfs题狂错，蜜汁runtime error不知道是不是因为队列爆了，感觉和其他别人AC的代码差别不大。
+//之后终于弄明白了，原来是对于下界考虑错了，导致0这个点会无限入栈最后导致STACK爆了，以后处理类似问题的时候看到runtime error应该考虑是否是因为无边界
+//即认为必能找出结果时可能会出现爆栈的情况。
 #include<iostream>
+#include<cstdio>
 #include<algorithm>
 #include<queue>
-#include<cstdio>
 #include<cstring>
 using namespace std;
-struct point{
-	int steps;
-	int num;
-}ori,temp1,temp2,temp3,temp4;
-queue<point>q;
-int n,k,visit[900100];
+int a,b,visit[999999],n,s;
+struct node{
+	int num,step;
+}ori,temp,temp2;
+queue<node>q;
 int bfs()
 {
-	int temp;
-	ori.num=n,ori.steps=0;
+	while(!q.empty()) q.pop();
+	ori.num=a,ori.step=0;
 	q.push(ori);
-	visit[n]=1;
 	while(!q.empty())
 	{
-		temp1=q.front();
+		temp=q.front();
 		q.pop();
-		visit[temp1.num]=1;
-		if(temp1.num==k) return temp1.steps;
-		temp3.steps=temp1.steps+1;
-		temp2.steps=temp1.steps+1;
-		temp4.steps=temp1.steps+1;
-		if(temp1.num<k) {temp2.num=temp1.num+1;if(!visit[temp2.num]) {q.push(temp2);visit[temp2.num]=1;}}
-		if(temp1.num>1) {temp3.num=temp1.num-1;if(!visit[temp3.num]) {q.push(temp3);visit[temp3.num]=1;}}
-		if(temp1.num<k) {temp4.num=temp1.num*2;if(!visit[temp4.num]) {q.push(temp4);visit[temp4.num]=1;}}
+		n=temp.num;s=temp.step;visit[n]=1;
+		if(n==b) return s;
+		if(n<100000) {temp2.num=n+1,temp2.step=s+1;if(!visit[temp2.num]) q.push(temp2);}
+		if(n>=1) {temp2.num=n-1,temp2.step=s+1;if(!visit[temp2.num]) q.push(temp2);}
+		if(n<100000) {temp2.num=n*2,temp2.step=s+1;if(!visit[temp2.num]) q.push(temp2);}
 	}
-	return -1;
-}
+} 
 int main()
 {
-	while(~scanf("%d%d",&n,&k))
+	while(~scanf("%d%d",&a,&b))
 	{
-		while(!q.empty()) q.pop();
 		memset(visit,0,sizeof(visit));
-		cout<<bfs()<<endl;
+		printf("%d\n",bfs());
 	}
 }
 Problem E

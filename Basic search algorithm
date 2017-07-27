@@ -355,5 +355,106 @@ int main()
 	}
 	return 0;
 }
-
+Problem K
+//待改，应该还有一点点小问题，造成Runtime error，不过有点累，之后再改。
+#include<iostream>
+#include<queue>
+#include<cstring>
+#include<stack>
+using namespace std;
+int maze[10][10],visit[10][10],xn,yn,cnt=0,s;
+struct node{
+	int x,y,steps,former,it;
+}ori,temp,p[300];
+queue<node>q;
+stack<node>sss;
+void print_res(node ans)
+{
+	int kk=ans.it;
+	while(kk!=-1)
+	{
+		sss.push(p[kk]);
+		kk=p[kk].former;
+	}
+	while(!sss.empty())
+	{
+		node aa=sss.top();
+		sss.pop();
+		int xx=aa.x,yy=aa.y;
+		cout<<"("<<xx-1<<", "<<yy-1<<")"<<endl;
+	}
+}
+node bfs()
+{
+	while(!q.empty()) q.pop();
+	p[cnt].x=p[cnt].y=1,p[cnt].steps=0,p[cnt].it=cnt,p[cnt].former=-1,cnt++;
+	q.push(p[0]);
+	while(!q.empty())
+	{
+		temp=q.front();q.pop();
+		xn=temp.x,yn=temp.y;s=temp.steps;
+		if(xn==5&&yn==5) return temp;
+		visit[xn][yn]==1;
+	//	cout<<xn<<"         "<<yn<<endl;
+		if(xn+1<=5&&!visit[xn+1][yn])
+		{
+			p[cnt].x=xn+1;
+			p[cnt].y=yn;
+			p[cnt].steps=s+1;
+			p[cnt].it=cnt;
+			p[cnt].former=temp.it;
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(xn-1>=1&&!visit[xn-1][yn])
+		{
+			p[cnt].x=xn-1;
+			p[cnt].y=yn;
+			p[cnt].steps=s+1;
+			p[cnt].it=cnt;
+			p[cnt].former=temp.it;
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(yn+1<=5&&!visit[xn][yn+1])
+		{
+			p[cnt].x=xn;
+			p[cnt].y=yn+1;
+			p[cnt].steps=s+1;
+			p[cnt].it=cnt;
+			p[cnt].former=temp.it;
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(yn-1>=1&&!visit[xn][yn-1])
+		{
+			p[cnt].x=xn;
+			p[cnt].y=yn-1;
+			p[cnt].steps=s+1;
+			p[cnt].it=cnt;
+			p[cnt].former=temp.it;
+			q.push(p[cnt]);
+			cnt++;
+		}
+	}
+}
+void print_res()
+{
+	
+}
+int main()
+{
+	memset(visit,0,sizeof(visit));
+	for(int i=1;i<=5;i++)
+	{
+		for(int j=1;j<=5;j++)
+		{
+			cin>>maze[i][j];
+			if(maze[i][j]==1) visit[i][j]=1;
+		}
+	}
+	node ans=bfs();
+	print_res(ans);
+	
+}
 

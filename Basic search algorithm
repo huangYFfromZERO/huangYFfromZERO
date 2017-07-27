@@ -183,7 +183,76 @@ int main()
 		printf("%llu\n",temp3);
 	}
 }
-
-
+Problem F
+//有一个问题即在广搜当中如何把搜索过的路径都存储起来！看一下pot那道题如何解决的。 
+//基本思路对，但是细节应该有些地方错了。 
+//在我这里实际上如果想要把他存起来就需要一个上界，即可能搜索的点的上界，也就是visit，再用一个变量cnt为其在数组中分配内存。 
+//又是因为一个小错误纠结了好久，写的时候还是要仔细仔细再仔细。白白浪费了很多的时间。 
+//每次检验是否为素数肯定是会超时的啊，这都想不到吗！！！！！于是选择去打一个哈希表去处理。还是没有养成估计时间复杂度的习惯，这很不好。 
+#include<iostream>
+#include<queue>
+#include<cstdio>
+#include<cmath>
+#include<stack>
+#include<cstring>
+using namespace std;
+struct node{
+	int num,steps;
+}ori,temp,ans,temp1;
+queue<node>q;
+int m,n1,n2,visit[10009],n,s,w[5],temp2,prime[10009];
+bool check(int n)
+{
+	for(int i=2;i<=sqrt(n);i++) if(n%i==0) return false;
+	return true;
+}
+void ini()
+{
+	for(int i=2;i<=10000;i++)
+	if(check(i)) prime[i]=1;else prime[i]=0;
+}
+int bfs()
+{
+	while(!q.empty()) q.pop();
+	ori.num=n1,ori.steps=0;
+	q.push(ori);
+	while(!q.empty())
+	{
+		temp1=q.front();
+		q.pop();
+		n=temp1.num,s=temp1.steps,visit[temp1.num]=1;
+		visit[n]=1;
+		if(n==n2) return s;
+		w[4]=n%10;                                               //求四位的具体数值 
+		w[3]=(n/10)%10;
+		w[2]=(n/100)%10;
+		w[1]=n/1000;
+		for(int i=0;i<=9;i++)                                      //按位变+判断 
+		{
+			if(i!=0) 
+			{
+				temp2=n-w[1]*1000+i*1000;
+				if(prime[temp2]==1&&visit[temp2]==0) {temp.num=temp2,temp.steps=s+1,q.push(temp);}
+			}
+			temp2=n-w[2]*100+i*100;
+			if(prime[temp2]==1&&visit[temp2]==0) {temp.num=temp2,temp.steps=s+1,q.push(temp);}
+			temp2=n-w[3]*10+i*10;
+			if(prime[temp2]==1&&visit[temp2]==0) {temp.num=temp2,temp.steps=s+1,q.push(temp);}
+			temp2=n-w[4]+i;
+			if(prime[temp2]==1&&visit[temp2]==0) {temp.num=temp2,temp.steps=s+1,q.push(temp);}
+		}
+	}
+}
+int main()
+{
+	cin>>m; 
+	while(m--)
+	{
+		memset(visit,0,sizeof(visit));
+		ini();
+		cin>>n1>>n2;
+		cout<<bfs()<<endl;
+	}
+}
 
 

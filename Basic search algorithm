@@ -254,5 +254,106 @@ int main()
 		cout<<bfs()<<endl;
 	}
 }
+Problem H
+//这题险些不想继续改了，其实就是一个很小的错误，对于IMPOSSIBLE那个情况处理有点问题。总的来说感觉这道题还是一道特别水的题，迷迷糊糊写下来也A掉了，感觉
+//这道题我提高的部分在于用储存节点，再通过前驱把节点找出来，然后建一个STACK再把他们输出出来就解决了。就思想上而言这题有新的东西。
+#include<iostream>
+#include<queue>
+#include<cstring>
+#include<stack>
+using namespace std;
+struct node{
+	int na,nb,steps,op,former,it;
+}p[109*109],temp,ans;
+int visit[109][109],a,b,c,cnt=0,temp_a,temp_b,s,aij,aji,bij,bji,tt;
+queue<node>q;
+stack<int>ss;
+void print_res(node ans)
+{
+	int k=ans.it;
+	while(!ss.empty()) ss.pop();
+	while(k!=-1)
+	{
+		ss.push((p[k].op));
+		k=p[k].former;
+	}
+	while(!ss.empty())
+	{
+		tt=ss.top();
+		if(tt==1) cout<<"FILL(2)"<<endl;
+		else if(tt==2) cout<<"FILL(1)"<<endl;
+		else if(tt==3) cout<<"DROP(2)"<<endl;
+		else if(tt==4) cout<<"DROP(1)"<<endl;
+		else if(tt==5) cout<<"POUR(1,2)"<<endl;
+		else if(tt==6) cout<<"POUR(2,1)"<<endl;
+		ss.pop();
+	} 
+}
+node bfs()
+{
+	while(!q.empty()) q.pop();
+	p[cnt].na=0,p[cnt].nb=0,p[cnt].steps=0,p[cnt].former=-1,p[cnt].op=-1,p[cnt].it=cnt;cnt++;q.push(p[0]);
+	while(!q.empty())
+	{
+		temp=q.front();temp_a=temp.na,temp_b=temp.nb,s=temp.steps;visit[temp_a][temp_b]=1;q.pop();
+		if(temp_a==c||temp_b==c) return temp;
+		if(!visit[temp_a][b]) 
+		{
+			p[cnt].na=temp_a,p[cnt].nb=b,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=1;     //第一种操作，将B中的水填满 
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(!visit[a][temp_b]) 
+		{
+			p[cnt].na=a,p[cnt].nb=temp_b,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=2;     //第二种操作，将A中的水填满 
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(!visit[temp_a][0])
+		{
+			p[cnt].na=temp_a,p[cnt].nb=0,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=3;     //第三种操作，将B中的水全部倒掉 
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(!visit[0][temp_b])
+		{
+			p[cnt].na=0,p[cnt].nb=temp_b,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=4;     //第四种操作，将A中的水全部倒掉 
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(temp_a+temp_b<=b) bij=temp_a+temp_b,aij=0;
+		else bij=b,aij=temp_a+temp_b-b;
+		if(temp_a+temp_b<=a) aji=temp_a+temp_b,bji=0;
+		else aji=a,bji=temp_a+temp_b-a;
+		if(!visit[aij][bij])
+		{
+			p[cnt].na=aij,p[cnt].nb=bij,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=5;       //第五种操作，将B中的水全部倒到A中去，即j倒到i里去 
+			q.push(p[cnt]);
+			cnt++;
+		}
+		if(!visit[aji][bji])
+		{
+			p[cnt].na=aji,p[cnt].nb=bji,p[cnt].steps=s+1,p[cnt].former=temp.it,p[cnt].it=cnt,p[cnt].op=6;       //第六种操作，将A中的水全部倒到B中去，即i倒到j里去 
+			q.push(p[cnt]);
+			cnt++;
+		} 
+	}
+	return p[0];
+}
+int main()
+{
+	while(cin>>a>>b>>c)
+	{
+		memset(visit,0,sizeof(visit));
+		ans=bfs();
+		if(ans.former==-1) cout<<"impossible"<<endl;
+		else
+		{
+			cout<<ans.steps<<endl;
+			print_res(ans);
+		}
+	}
+	return 0;
+}
 
 

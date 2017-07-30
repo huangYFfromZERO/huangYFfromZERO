@@ -1,0 +1,13 @@
+##!!注意其中JOIN的使用
+list_1 = [str(2), ]
+def judge(n):
+    for i in range(2,n):
+        if n%i==0:
+            return 0
+for i in range(3,101):
+    if judge(i)!=0:
+        t=str(i)
+        list_1.append(t)
+a = " ".join(list_1)
+print(a)
+#!!注意join方法的使用必须保证join的list中所有的元素均为string类型的

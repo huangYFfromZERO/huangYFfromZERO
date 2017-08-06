@@ -1,0 +1,142 @@
+#My first Networks
+import random
+import numpy as np
+def Sigmoid(z):
+    #sigmoid函数的导数
+    return 1./(1.+np.exp(z))
+
+def Prime_Sigmoid(z):
+    #sigmoid函数的导数，反向求的时候会用到，basis的减量就是导数，weigh的减量是导数乘对应的输入量
+    return Sigmoid(z)*(1-Sigmoid(z))
+
+class NeuralNetwork(object):
+    def __init__(self,sizes):
+         #sizes 为各层的特征
+        self.layers = len(sizes)
+        self.sizes = sizes
+        #总共的层数
+        self.basis = [np.random.randn(1, y) for y in sizes[1:]]
+        #basis随机生成
+        self.weigh = [np.random.randn(x, y) for x, y in zip(sizes[:-1],sizes[1:])]
+
+    def Feed_Forward(self,in_put):
+        #前馈，用于结果比较部分，通过一个输入计算到最后，可以比较点，看点是否一样。
+        i = 0
+        for b, w in zip(self.basis, self.weigh):
+            in_put = Sigmoid(np.dot(in_put, w)+b)
+        return in_put
+
+    def Stochastic_Gradient_Descent(self,training_data, epochs, mini_training_size, learing_rate, test_data):
+        #epochs为训练次数，mini_traing_size为stochastic里面的最小分组
+        if test_data: n_test = len(test_data)
+        n = len(training_data)
+        for i in range(epochs):
+            random.shuffle(training_data)
+            #打乱训练样本
+            mini_training_samples = [training_data[k:k+mini_training_size] for k in range(0,n,mini_training_size)]
+            #创造临时样本集
+#            print(mini_training_samples)
+            for mini_training_sample in mini_training_samples:
+#               print(mini_training_sample)
+                self.Train(mini_training_sample, learing_rate)
+            #暂时不考虑有测试集的情况
+            if test_data:                                                           #之后这里与评价有关暂时不知道是干啥的
+                print ("测试集 {0}:正确率为 {1} / {2}".format(                           #反应的应该是测试的成功率，其实可视化是可以多做的一个部分
+                    i, self.Evaluate(test_data), n_test))
+            else:
+                print ("测试集 {0} 训练完毕".format(i+1))
+
+    def Train(self, mini_training_sample, learing_rate):
+        new_b_list = [np.zeros(b.shape) for b in self.basis]
+        new_w_list = [np.zeros(w.shape) for w in self.weigh]
+        for x,y in mini_training_sample:
+            #其中x是样本即图像，y为点向量（1*2）
+            #对于最小训练集当中的每一个训练对象,先去求他的BP减少量
+            delta_b , delta_w = self.Back_Propagation(x,y)
+            new_b_list = [nb+dnb for nb, dnb in zip(new_b_list, delta_b)]
+            new_w_list = [nw+dnw for nw, dnw in zip(new_w_list, delta_w)]
+            #计算每一层的更新量
+            self.basis = [b-(learing_rate/len(mini_training_sample))*nb for b, nb in zip(self.basis, new_b_list)]
+            self.weigh = [w-(learing_rate/len(mini_training_sample))*nw for w, nw in zip(self.weigh, new_w_list)]
+            #更新weigh,basis
+
+    def Back_Propagation(self,x,y):
+        new_b_list = [np.zeros(b.shape) for b in self.basis]
+        new_w_list = [np.zeros(w.shape) for w in self.weigh]
+        in_put = x
+        in_puts = [x]
+        calculations = []
+        for b, w in zip(self.basis, self.weigh):
+            calculation = np.dot(in_put, w) + b
+            calculations.append(calculation)
+            in_put = Sigmoid(calculation)
+            in_puts.append(in_put)
+        #in_put的最后一个得到也是输出序列，即两个点的坐标
+        delta = self.cost(in_puts[-1], y) * Prime_Sigmoid(calculations[-1])
+#        print(in_puts)
+        #这里得到所求的导数，之后对b不变，对w乘一个系数即可
+        new_b_list[-1] = delta
+        new_w_list[-1] = np.dot(delta, in_puts[-2].transpose())
+        #这里感觉应该要使用multiply
+        #Back_Propagation这里为先赋值，对输出层
+        for j in range(2, self.layers):
+            calculation = calculations[-1*j]
+            #先找到最后的计算结果
+            temp = Sigmoid(calculation)
+            delta = np.dot(delta, self.weigh[-j+1]) * temp
+            new_b_list[-j] = delta
+            new_w_list[-j] = np.dot(in_puts[-j-1].transpose(), delta)
+        #每一层更新，返回每一层需要的delta
+        return (new_b_list, new_w_list)
+
+    def Print_temp_result(self,in_put):
+        print(self.Feed_Forward(in_put))
+
+    def Input_Test_Data(self):
+        a = 5
+
+    def cost(self, out_put, y):
+        return (out_put - y)
+    def Evaluate(self,test_data):
+        cals= [self.Feed_Forward(x)-y for (x,y) in test_data]
+        cnt = 0
+        for cal in cals:
+            sum = cal[0][0]*cal[0][0]+cal[0][1]*cal[0][1]
+            sum = np.sqrt(sum)
+            if sum<1:
+                cnt+=1
+        return cnt
+
+#Test NeuralNetwork Building AND FeedForward Calculate
+#p = NeuralNetwork([3,2,1])
+#t = np.ones(3).reshape(1,3)
+#k = p.Feed_Forward(t)
+#print(k)
+#Sample Training Data
+TR1 = np.zeros(4).reshape(1,4)
+TR2 = np.zeros(4).reshape(1,4)
+TR3 = np.zeros(4).reshape(1,4)
+TR4 = np.zeros(4).reshape(1,4)
+TR1[0][0] = 1
+TR2[0][1] = 1
+TR3[0][2] = 1
+TR4[0][3] = 1
+TR1ZB = np.zeros(2).reshape(1,2)
+TR2ZB = np.zeros(2).reshape(1,2)
+TR3ZB = np.zeros(2).reshape(1,2)
+TR4ZB = np.zeros(2).reshape(1,2)
+TR2ZB[0][0] = 1
+TR3ZB[0][1] = 1
+TR3ZB[0][0] = TR2ZB[0][1] = 1
+Test_data = []
+Test_data.append((TR1,TR1ZB))
+Test_data.append((TR2,TR2ZB))
+Test_data.append((TR3,TR3ZB))
+Test_data.append((TR4,TR4ZB))
+Rtest_data = []
+Rtest_data.append((TR1,TR1ZB))
+Rtest_data.append((TR3,TR3ZB))
+#print(Test_data)
+#建一个四个样本的Test_data,进行运算，并可以从其中选两个作为测试训练的样本（这是很不好的！）
+p = NeuralNetwork([4,2,1])
+p.Stochastic_Gradient_Descent(Test_data,20,2,0.4,Rtest_data)
